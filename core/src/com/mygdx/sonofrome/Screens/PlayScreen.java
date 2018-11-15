@@ -7,6 +7,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -25,12 +26,14 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.sonofrome.Scenes.Hud;
 import com.mygdx.sonofrome.SonOfRome;
 import com.mygdx.sonofrome.Sprites.Player;
+import com.mygdx.sonofrome.Tools.B2WorldCreator;
 
 import java.awt.event.InputMethodEvent;
 
 public class PlayScreen implements Screen {
 
     private SonOfRome game;
+    private TextureAtlas atlas;
 
     private OrthographicCamera gamecam;
     private Viewport gamePort;
@@ -48,6 +51,7 @@ public class PlayScreen implements Screen {
     public PlayScreen(SonOfRome game){
 
         this.game = game;
+        atlas = new TextureAtlas("pack/game.pack");
 
         gamecam = new OrthographicCamera();
         gamePort = new FitViewport(SonOfRome.V_WIDTH / SonOfRome.PPM,SonOfRome.V_HEIGHT / SonOfRome.PPM,gamecam);
@@ -62,50 +66,13 @@ public class PlayScreen implements Screen {
         world = new World(new Vector2(0,-10), true);
         b2dr = new Box2DDebugRenderer();
 
-        BodyDef bdef = new BodyDef();
-        PolygonShape shape = new PolygonShape();
-        FixtureDef fdef = new FixtureDef();
-        Body body;
+        new B2WorldCreator(world, map);
 
-        for(MapObject object : map.getLayers().get(1).getObjects().getByType(RectangleMapObject.class)){
-            Rectangle rect = ((RectangleMapObject)object).getRectangle();
+        player = new Player(world, this);
+    }
 
-            bdef.type = BodyDef.BodyType.StaticBody;
-            bdef.position.set((rect.getX() + rect.getWidth() / 2)/ SonOfRome.PPM, (rect.getY() + rect.getHeight() / 2)/ SonOfRome.PPM);
-
-            body = world.createBody(bdef);
-
-            shape.setAsBox(rect.getWidth() / 2 / SonOfRome.PPM, rect.getHeight() / 2 / SonOfRome.PPM);
-            fdef.shape = shape;
-            body.createFixture(fdef);
-        }
-
-        for(MapObject object : map.getLayers().get(2).getObjects().getByType(RectangleMapObject.class)){
-            Rectangle rect = ((RectangleMapObject)object).getRectangle();
-
-            bdef.type = BodyDef.BodyType.StaticBody;
-            bdef.position.set((rect.getX() + rect.getWidth() / 2)/ SonOfRome.PPM, (rect.getY() + rect.getHeight() / 2)/ SonOfRome.PPM);
-
-            body = world.createBody(bdef);
-
-            shape.setAsBox(rect.getWidth() / 2 / SonOfRome.PPM, rect.getHeight() / 2 / SonOfRome.PPM);
-            fdef.shape = shape;
-            body.createFixture(fdef);
-        }
-
-        for(MapObject object : map.getLayers().get(3).getObjects().getByType(RectangleMapObject.class)){
-            Rectangle rect = ((RectangleMapObject)object).getRectangle();
-
-            bdef.type = BodyDef.BodyType.StaticBody;
-            bdef.position.set((rect.getX() + rect.getWidth() / 2)/ SonOfRome.PPM, (rect.getY() + rect.getHeight() / 2)/ SonOfRome.PPM);
-
-            body = world.createBody(bdef);
-
-            shape.setAsBox(rect.getWidth() / 2 / SonOfRome.PPM, rect.getHeight() / 2 / SonOfRome.PPM);
-            fdef.shape = shape;
-            body.createFixture(fdef);
-        }
-        player = new Player(world);
+    public TextureAtlas getAtlas(){
+        return atlas;
     }
 
     public void handleInput(float dt){
@@ -123,6 +90,8 @@ public class PlayScreen implements Screen {
         handleInput(delta);
 
         world.step(1/60f,6,2);
+
+        player.update(delta);
 
         gamecam.position.x = player.b2body.getPosition().x;
 
@@ -144,6 +113,11 @@ public class PlayScreen implements Screen {
         renderer.render();
 
         b2dr.render(world, gamecam.combined);
+
+        game.batch.setProjectionMatrix(gamecam.combined);
+        game.batch.begin();
+        player.draw(game.batch);
+        game.batch.end();
 
         game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
         hud.stage.draw();
@@ -172,6 +146,10 @@ public class PlayScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        map.dispose();
+        renderer.dispose();
+        world.dispose();
+        b2dr.dispose();
+        hud.dispose();
     }
 }
