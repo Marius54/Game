@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
@@ -27,6 +28,7 @@ import com.mygdx.sonofrome.Scenes.Hud;
 import com.mygdx.sonofrome.SonOfRome;
 import com.mygdx.sonofrome.Sprites.Player;
 import com.mygdx.sonofrome.Tools.B2WorldCreator;
+import com.mygdx.sonofrome.Tools.WorldContactListener;
 
 import java.awt.event.InputMethodEvent;
 
@@ -61,14 +63,16 @@ public class PlayScreen implements Screen {
         map = mapLoader.load("Map.tmx");
         renderer = new OrthogonalTiledMapRenderer(map, 1/ SonOfRome.PPM);
         gamecam.position.set(gamePort.getWorldWidth()/2,gamePort.getWorldHeight()*3, 0);
-        System.out.println(gamePort.getWorldWidth()+"-----"+gamePort.getWorldHeight()*3);
 
-        world = new World(new Vector2(0,-10), true);
+        world = new World(new Vector2(0,-32), true);
         b2dr = new Box2DDebugRenderer();
+        b2dr.setDrawBodies(false);
 
         new B2WorldCreator(world, map);
 
-        player = new Player(world, this);
+        player = new Player(world, this, hud);
+
+        world.setContactListener(new WorldContactListener());
     }
 
     public TextureAtlas getAtlas(){
@@ -76,14 +80,31 @@ public class PlayScreen implements Screen {
     }
 
     public void handleInput(float dt){
-        if(Gdx.input.isKeyJustPressed(Input.Keys.UP))
-            player.b2body.applyLinearImpulse(new Vector2(0,4f), player.b2body.getWorldCenter(), true);
+//        if(hud.isUpPressed() && player.b2body.getLinearVelocity().y <= 0.7)
+//            player.b2body.applyLinearImpulse(new Vector2(0,0.5f), player.b2body.getWorldCenter(), true);
+//
+//        if(hud.isRightPressed() && player.b2body.getLinearVelocity().x <= 0.7 && player.b2body.getPosition().x < 45)
+//            player.b2body.applyLinearImpulse(new Vector2(0.05f, 0), player.b2body.getWorldCenter(), true);
+//
+//        if(hud.isLeftPressed() && player.b2body.getLinearVelocity().x > -0.7 && player.b2body.getPosition().x > 5)
+//                player.b2body.applyLinearImpulse(new Vector2(-0.05f, 0), player.b2body.getWorldCenter(), true);
 
-        if(Gdx.input.isKeyPressed((Input.Keys.RIGHT)) && player.b2body.getLinearVelocity().x <= 5)
-            player.b2body.applyLinearImpulse(new Vector2(0.1f, 0), player.b2body.getWorldCenter(), true);
+        float velX = 0, velY = 0;
+        if(hud.isUpPressed() && player.b2body.getLinearVelocity().y == 0 ) {
+            velY = 20.0f ;
+        } else if(hud.isRightPressed() && player.b2body.getPosition().x < 46) {
+            velX = 2.0f;
+        } else if(hud.isLeftPressed() && player.b2body.getPosition().x > 4) {
+            velX = -2.0f;
+        }else if(hud.isActionPressed()){
+//            TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get("4");
+//            System.out.println(layer.getCell(player.getX(),player.getY()));
+        }
+        player.b2body.setLinearVelocity(velX, velY);
+    }
 
-        if(Gdx.input.isKeyPressed((Input.Keys.LEFT)) && player.b2body.getLinearVelocity().x >= -2)
-            player.b2body.applyLinearImpulse(new Vector2(-0.1f, 0), player.b2body.getWorldCenter(), true);
+    public Hud getHud(){
+        return hud;
     }
 
     public void update(float delta){
@@ -94,6 +115,8 @@ public class PlayScreen implements Screen {
         player.update(delta);
 
         gamecam.position.x = player.b2body.getPosition().x;
+        if( gamecam.position.y - player.b2body.getPosition().y > 1 || player.b2body.getPosition().y - gamecam.position.y  > 1)
+            gamecam.position.y = player.b2body.getPosition().y;
 
         gamecam.update();
         renderer.setView(gamecam);

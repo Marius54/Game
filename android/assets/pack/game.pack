@@ -24,3 +24,10 @@ enemies
   orig: 240, 192
   offset: 0, 0
   index: -1
+rpgcritter update formatted transparent
+  rotate: false
+  xy: 243, 1
+  size: 240, 192
+  orig: 240, 192
+  offset: 0, 0
+  index: -1
