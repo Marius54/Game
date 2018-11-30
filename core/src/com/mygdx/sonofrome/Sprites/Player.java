@@ -3,17 +3,21 @@ package com.mygdx.sonofrome.Sprites;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.sonofrome.Scenes.Hud;
 import com.mygdx.sonofrome.Screens.PlayScreen;
 import com.mygdx.sonofrome.SonOfRome;
+import com.mygdx.sonofrome.Tools.Constants;
 
 public class Player extends Sprite {
     public enum State {RUNNING, STANDING, JUMPING, HITTING};
@@ -58,7 +62,7 @@ public class Player extends Sprite {
 
         definePlayer();
         playerStand = new TextureRegion(getTexture(), 32, 195,32,32 );
-        setBounds(0,0,32/SonOfRome.PPM,32/SonOfRome.PPM);
+        setBounds(0,0,32/Constants.PPM,32/Constants.PPM);
         setRegion(playerStand);
 
 
@@ -115,24 +119,69 @@ public class Player extends Sprite {
 
     public void definePlayer(){
         BodyDef bdef = new BodyDef();
-        bdef.position.set(524/ SonOfRome.PPM,1010/ SonOfRome.PPM);
+        bdef.position.set(524/ Constants.PPM,1010/ Constants.PPM);
         bdef.type = BodyDef.BodyType.DynamicBody;
         b2body = world.createBody(bdef);
 
         FixtureDef fdef = new FixtureDef();
-        CircleShape shape = new CircleShape();
-        shape.setRadius(15/ SonOfRome.PPM);
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(16/Constants.PPM,16/Constants.PPM);
+        fdef.filter.categoryBits = Constants.BIT_PLAYER;
+        fdef.filter.maskBits = Constants.BIT_ENEMY | Constants.BIT_GROUND | Constants.BIT_TREE;
 
         fdef.shape = shape;
-        b2body.createFixture(fdef);
+        b2body.createFixture(fdef).setUserData("player");
 
-        EdgeShape hammer = new EdgeShape();
-        hammer.set(new Vector2(16 / SonOfRome.PPM, -12 / SonOfRome.PPM), new Vector2(16 / SonOfRome.PPM, 12 / SonOfRome.PPM));
-//        hammer.set(new Vector2(-16 / SonOfRome.PPM, -12 / SonOfRome.PPM), new Vector2(-16 / SonOfRome.PPM, 12 / SonOfRome.PPM));
-        fdef.shape = hammer;
+        PolygonShape sensorShape = new PolygonShape();
+
+        //foot Sensor
+        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(0,-16/Constants.PPM),0);
+        fdef.shape = sensorShape;
         fdef.isSensor = true;
+        b2body.createFixture(fdef).setUserData("footSensor");
 
-        b2body.createFixture(fdef).setUserData("hammer");
+        //head Sensor
+        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(0,16/Constants.PPM),0);
+        fdef.shape = sensorShape;
+        fdef.isSensor = true;
+        b2body.createFixture(fdef).setUserData("headSensor");
+
+        //right Sensor
+        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(16/Constants.PPM,0),0);
+        fdef.shape = sensorShape;
+        fdef.isSensor = true;
+        b2body.createFixture(fdef).setUserData("rightSensor");
+
+        //left Sensor
+        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(-16/Constants.PPM,0),0);
+        fdef.shape = sensorShape;
+        fdef.isSensor = true;
+        b2body.createFixture(fdef).setUserData("leftSensor");
+
+        //up-right Sensor
+        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(22/Constants.PPM,22/Constants.PPM),0);
+        fdef.shape = sensorShape;
+        fdef.isSensor = true;
+        b2body.createFixture(fdef).setUserData("upRightSensor");
+
+        //down-right Sensor
+        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(22/Constants.PPM,-22/Constants.PPM),0);
+        fdef.shape = sensorShape;
+        fdef.isSensor = true;
+        b2body.createFixture(fdef).setUserData("downRightSensor");
+
+        //down-left Sensor
+        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(-22/Constants.PPM,-22/Constants.PPM),0);
+        fdef.shape = sensorShape;
+        fdef.isSensor = true;
+        b2body.createFixture(fdef).setUserData("downLeftSensor");
+
+        //up-left Sensor
+        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(-22/Constants.PPM,22/Constants.PPM),0);
+        fdef.shape = sensorShape;
+        fdef.isSensor = true;
+        b2body.createFixture(fdef).setUserData("upLeftSensor");
+
     }
 
 }

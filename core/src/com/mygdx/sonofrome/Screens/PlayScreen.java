@@ -26,8 +26,11 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.sonofrome.Scenes.Hud;
 import com.mygdx.sonofrome.SonOfRome;
+import com.mygdx.sonofrome.Sprites.Ground;
+import com.mygdx.sonofrome.Sprites.InteractiveTileObject;
 import com.mygdx.sonofrome.Sprites.Player;
 import com.mygdx.sonofrome.Tools.B2WorldCreator;
+import com.mygdx.sonofrome.Tools.Constants;
 import com.mygdx.sonofrome.Tools.WorldContactListener;
 
 import java.awt.event.InputMethodEvent;
@@ -50,29 +53,33 @@ public class PlayScreen implements Screen {
 
     private Player player;
 
+    private WorldContactListener contact;
+
     public PlayScreen(SonOfRome game){
 
         this.game = game;
-        atlas = new TextureAtlas("pack/game.pack");
+        atlas = new TextureAtlas("pack/pack.pack");
 
         gamecam = new OrthographicCamera();
-        gamePort = new FitViewport(SonOfRome.V_WIDTH / SonOfRome.PPM,SonOfRome.V_HEIGHT / SonOfRome.PPM,gamecam);
+        gamePort = new FitViewport(Constants.V_WIDTH / Constants.PPM,Constants.V_HEIGHT / Constants.PPM,gamecam);
         hud = new Hud(game.batch);
 
         mapLoader = new TmxMapLoader();
         map = mapLoader.load("Map.tmx");
-        renderer = new OrthogonalTiledMapRenderer(map, 1/ SonOfRome.PPM);
+        renderer = new OrthogonalTiledMapRenderer(map, 1/ Constants.PPM);
         gamecam.position.set(gamePort.getWorldWidth()/2,gamePort.getWorldHeight()*3, 0);
 
         world = new World(new Vector2(0,-32), true);
         b2dr = new Box2DDebugRenderer();
-        b2dr.setDrawBodies(false);
+//        b2dr.setDrawBodies(false);
 
         new B2WorldCreator(world, map);
 
         player = new Player(world, this, hud);
 
-        world.setContactListener(new WorldContactListener());
+        contact = new WorldContactListener();
+
+        world.setContactListener(contact);
     }
 
     public TextureAtlas getAtlas(){
@@ -80,15 +87,6 @@ public class PlayScreen implements Screen {
     }
 
     public void handleInput(float dt){
-//        if(hud.isUpPressed() && player.b2body.getLinearVelocity().y <= 0.7)
-//            player.b2body.applyLinearImpulse(new Vector2(0,0.5f), player.b2body.getWorldCenter(), true);
-//
-//        if(hud.isRightPressed() && player.b2body.getLinearVelocity().x <= 0.7 && player.b2body.getPosition().x < 45)
-//            player.b2body.applyLinearImpulse(new Vector2(0.05f, 0), player.b2body.getWorldCenter(), true);
-//
-//        if(hud.isLeftPressed() && player.b2body.getLinearVelocity().x > -0.7 && player.b2body.getPosition().x > 5)
-//                player.b2body.applyLinearImpulse(new Vector2(-0.05f, 0), player.b2body.getWorldCenter(), true);
-
         float velX = 0, velY = 0;
         if(hud.isUpPressed() && player.b2body.getLinearVelocity().y == 0 ) {
             velY = 20.0f ;
@@ -96,9 +94,9 @@ public class PlayScreen implements Screen {
             velX = 2.0f;
         } else if(hud.isLeftPressed() && player.b2body.getPosition().x > 4) {
             velX = -2.0f;
-        }else if(hud.isActionPressed()){
-//            TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get("4");
-//            System.out.println(layer.getCell(player.getX(),player.getY()));
+        }
+        if(hud.isActionPressed() && hud.isRightPressed() && contact.isRightContactWithGround()) {
+            System.out.println("Contact + Right");
         }
         player.b2body.setLinearVelocity(velX, velY);
     }

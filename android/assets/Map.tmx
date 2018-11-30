@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.0" orientation="orthogonal" renderorder="right-down" width="150" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="127">
+<map version="1.2" tiledversion="1.2.0" orientation="orthogonal" renderorder="right-down" width="150" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="155">
  <tileset firstgid="1" name="map" tilewidth="32" tileheight="32" tilecount="400" columns="20">
   <image source="Map/map.png" width="640" height="640"/>
  </tileset>
@@ -119,28 +119,27 @@
   <object id="89" x="0" y="832" width="64" height="768"/>
  </objectgroup>
  <objectgroup id="5" name="Trees">
-  <object id="105" x="1280.67" y="596.667"/>
-  <object id="106" x="1344" y="596.667"/>
-  <object id="107" x="1409.33" y="596.667"/>
-  <object id="108" x="1456" y="596.667"/>
-  <object id="109" x="1505.33" y="597.333"/>
-  <object id="110" x="1646" y="598"/>
-  <object id="111" x="1710.67" y="598"/>
-  <object id="112" x="1761.33" y="598"/>
-  <object id="113" x="1838" y="597.333"/>
-  <object id="114" x="1872" y="597.333"/>
-  <object id="115" x="1903.33" y="597.333"/>
-  <object id="116" x="2102.67" y="628.667"/>
-  <object id="117" x="2364.67" y="534.667"/>
-  <object id="118" x="2456" y="374"/>
-  <object id="119" x="2711.33" y="181.333"/>
-  <object id="120" x="2934.67" y="436.667"/>
-  <object id="121" x="3094" y="566"/>
-  <object id="122" x="3392" y="596.667"/>
-  <object id="123" x="3632.67" y="596"/>
-  <object id="124" x="3863.33" y="597.333"/>
-  <object id="125" x="3759.33" y="596"/>
-  <object id="126" x="880" y="597.333"/>
+  <object id="127" x="1248" y="544" width="64" height="64"/>
+  <object id="128" x="1312" y="544" width="64" height="64"/>
+  <object id="129" x="1376" y="544" width="64" height="64"/>
+  <object id="130" x="1440" y="576" width="32" height="32"/>
+  <object id="131" x="1472" y="544" width="64" height="64"/>
+  <object id="132" x="1632" y="544" width="32" height="64"/>
+  <object id="133" x="1696" y="576" width="32" height="32"/>
+  <object id="135" x="1728" y="544" width="64" height="64"/>
+  <object id="138" x="1824" y="544" width="32" height="64"/>
+  <object id="139" x="1856" y="576" width="32" height="32"/>
+  <object id="140" x="1888" y="576" width="32" height="32"/>
+  <object id="141" x="2048" y="480" width="96" height="160"/>
+  <object id="142" x="2336" y="480" width="64" height="64"/>
+  <object id="144" x="2400" y="288" width="96" height="96"/>
+  <object id="147" x="2656" y="32" width="96" height="160"/>
+  <object id="148" x="2880" y="288" width="96" height="160"/>
+  <object id="149" x="3040" y="416" width="96" height="160"/>
+  <object id="150" x="3616" y="576" width="32" height="32"/>
+  <object id="151" x="3744" y="576" width="32" height="32"/>
+  <object id="153" x="3808" y="448" width="96" height="160"/>
+  <object id="154" x="864" y="576" width="32" height="32"/>
  </objectgroup>
  <layer id="2" name="Graphic Layer" width="150" height="50">
   <data encoding="csv">

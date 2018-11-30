@@ -9,28 +9,24 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.sonofrome.SonOfRome;
+import com.mygdx.sonofrome.Tools.Constants;
 
 public class Tree  extends InteractiveTileObject {
 
-    private World world;
-    private TiledMap map;
-    private TiledMapTile tile;
-    private Rectangle bounds;
-    private Body body;
-
     public Tree(World world, TiledMap map, Rectangle bounds) {
         super(world, map, bounds);
-        BodyDef bdef = new BodyDef();
-        FixtureDef fdef = new FixtureDef();
-        PolygonShape shape = new PolygonShape();
+        fixture.setUserData("Tree");
+        setCategoryFilter(Constants.BIT_TREE);
+    }
 
-        bdef.type = BodyDef.BodyType.DynamicBody;
-        bdef.position.set((bounds.getX() + bounds.getWidth() / 2)/ SonOfRome.PPM, (bounds.getY() + bounds.getHeight() / 2)/ SonOfRome.PPM);
+    @Override
+    public void lovit() {
+        System.out.println("Lovit");
+        setCategoryFilter(Constants.BIT_DEFAULT);
+    }
 
-        body = world.createBody(bdef);
-
-        shape.setAsBox(bounds.getWidth() / 2 / SonOfRome.PPM, bounds.getHeight() / 2 / SonOfRome.PPM);
-        fdef.shape = shape;
-        body.createFixture(fdef);
+    public void mor() {
+        System.out.println("Lovit");
+        setCategoryFilter(Constants.BIT_DEFAULT);
     }
 }

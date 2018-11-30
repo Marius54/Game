@@ -5,11 +5,13 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.sonofrome.SonOfRome;
+import com.mygdx.sonofrome.Tools.Constants;
 
 public abstract class InteractiveTileObject {
     private World world;
@@ -17,6 +19,8 @@ public abstract class InteractiveTileObject {
     private TiledMapTile tile;
     private Rectangle bounds;
     private Body body;
+
+    protected Fixture fixture;
 
     public InteractiveTileObject(World world, TiledMap map, Rectangle bounds)
     {
@@ -29,12 +33,19 @@ public abstract class InteractiveTileObject {
         PolygonShape shape = new PolygonShape();
 
         bdef.type = BodyDef.BodyType.StaticBody;
-        bdef.position.set((bounds.getX() + bounds.getWidth() / 2)/ SonOfRome.PPM, (bounds.getY() + bounds.getHeight() / 2)/ SonOfRome.PPM);
+        bdef.position.set((bounds.getX() + bounds.getWidth() / 2)/ Constants.PPM, (bounds.getY() + bounds.getHeight() / 2)/ Constants.PPM);
 
         body = world.createBody(bdef);
 
-        shape.setAsBox(bounds.getWidth() / 2 / SonOfRome.PPM, bounds.getHeight() / 2 / SonOfRome.PPM);
+        shape.setAsBox(bounds.getWidth() / 2 / Constants.PPM, bounds.getHeight() / 2 / Constants.PPM);
         fdef.shape = shape;
-        body.createFixture(fdef);
+        fixture = body.createFixture(fdef);
     }
+
+    public void setCategoryFilter(short filterBit){
+        Filter filter = new Filter();
+        filter.categoryBits = filterBit;
+        fixture.setFilterData(filter);
+    }
+    public abstract void lovit();
 }

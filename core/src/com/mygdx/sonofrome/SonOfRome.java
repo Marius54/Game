@@ -9,10 +9,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.sonofrome.Screens.PlayScreen;
 
 public class SonOfRome extends Game {
-	public static final int V_WIDTH = 640;
-	public static final int V_HEIGHT = 384;
-	public static final float PPM = 100;
-
 	public SpriteBatch batch;
 	
 	@Override

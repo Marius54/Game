@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.sonofrome.SonOfRome;
+import com.mygdx.sonofrome.Tools.Constants;
 
 
 public class Hud implements Disposable {
@@ -53,7 +54,7 @@ public class Hud implements Disposable {
 
         //setup the HUD viewport using a new camera seperate from our gamecam
         //define our stage using that viewport and our games spritebatch
-        viewport = new FitViewport(SonOfRome.V_WIDTH,SonOfRome.V_HEIGHT , new OrthographicCamera());
+        viewport = new FitViewport(Constants.V_WIDTH,Constants.V_HEIGHT , new OrthographicCamera());
         stage = new Stage(viewport, sb);
 
         stage.addListener(new InputListener(){
@@ -218,18 +219,6 @@ public class Hud implements Disposable {
         controls.add();
         controls.add(downImg).size(downImg.getWidth(), downImg.getHeight());
         controls.add();
-
-//        controls2.add();
-//        controls2.add();
-//        controls2.add();
-//        controls2.row().pad(5, 5, 5, 5);
-//        controls2.add();
-//        controls2.add(attackImg).size(attackImg.getWidth(), attackImg.getHeight());
-//        controls2.add();
-//        controls2.row().pad(5, 5, 5, 5);
-//        controls2.add();
-//        controls2.add();
-//        controls2.add();
 
         //add our labels to our table, padding the top, and giving them all equal width with expandX
         table.add(lifeTextLabel).expandX().padTop(10);
