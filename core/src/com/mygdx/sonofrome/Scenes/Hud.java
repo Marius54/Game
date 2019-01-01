@@ -261,6 +261,10 @@ public class Hud implements Disposable {
         return actionPressed;
     }
 
+//    public void addWood(int wood){
+//        this.wood = this.wood + wood;
+//    }
+
     @Override
     public void dispose() {
         stage.dispose();

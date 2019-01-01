@@ -1,39 +1,25 @@
 package com.mygdx.sonofrome.Screens;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.sonofrome.Scenes.Hud;
 import com.mygdx.sonofrome.SonOfRome;
-import com.mygdx.sonofrome.Sprites.Ground;
 import com.mygdx.sonofrome.Sprites.InteractiveTileObject;
 import com.mygdx.sonofrome.Sprites.Player;
 import com.mygdx.sonofrome.Tools.B2WorldCreator;
 import com.mygdx.sonofrome.Tools.Constants;
 import com.mygdx.sonofrome.Tools.WorldContactListener;
-
-import java.awt.event.InputMethodEvent;
 
 public class PlayScreen implements Screen {
 
@@ -55,9 +41,18 @@ public class PlayScreen implements Screen {
 
     private WorldContactListener contact;
 
-    public PlayScreen(SonOfRome game){
+    private static PlayScreen instance = null;
 
-        this.game = game;
+    public static PlayScreen getInstance(){
+        if(instance == null){
+            instance = new PlayScreen();
+        }
+        return instance;
+    }
+
+    private PlayScreen(){
+
+        this.game = SonOfRome.getInstance();
         atlas = new TextureAtlas("pack/pack.pack");
 
         gamecam = new OrthographicCamera();
@@ -77,7 +72,7 @@ public class PlayScreen implements Screen {
 
         player = new Player(world, this, hud);
 
-        contact = new WorldContactListener();
+        contact = new WorldContactListener(this);
 
         world.setContactListener(contact);
     }
@@ -88,6 +83,13 @@ public class PlayScreen implements Screen {
 
     public void handleInput(float dt){
         float velX = 0, velY = 0;
+
+        if(hud.isRightPressed()){
+            player.setFaceRight(true);
+        }
+        if(hud.isLeftPressed()){
+            player.setFaceRight(false);
+        }
         if(hud.isUpPressed() && player.b2body.getLinearVelocity().y == 0 ) {
             velY = 20.0f ;
         } else if(hud.isRightPressed() && player.b2body.getPosition().x < 46) {
@@ -95,10 +97,27 @@ public class PlayScreen implements Screen {
         } else if(hud.isLeftPressed() && player.b2body.getPosition().x > 4) {
             velX = -2.0f;
         }
-        if(hud.isActionPressed() && hud.isRightPressed() && contact.isRightContactWithGround()) {
-            System.out.println("Contact + Right");
+        if(hud.isActionPressed() && idle()){
+//            System.out.println(contact.isDownContact()+" "+contact.isUpContact()+" "+contact.isLeftContact()+" "+contact.isRightContact());
+            if(contact.isDownContact() && hud.isDownPressed() ) {
+                playerAction(contact.getDownTile());
+            }else if(contact.isUpContact() && hud.isUpPressed()) {
+                playerAction(contact.getUpTile());
+            }else if(!player.isFacingRight() && (contact.isLeftContact() || (contact.isLeftContact() && hud.isLeftPressed()))) {
+                playerAction(contact.getLeftTile());
+            }else if(player.isFacingRight() && (contact.isRightContact() || (contact.isRightContact() && hud.isRightPressed()))) {
+                playerAction(contact.getRightTile());
+            }
         }
         player.b2body.setLinearVelocity(velX, velY);
+    }
+
+    public boolean idle(){
+        if(!hud.isRightPressed() && !hud.isLeftPressed()) {
+            return true;
+        }
+        return false;
+
     }
 
     public Hud getHud(){
@@ -112,7 +131,7 @@ public class PlayScreen implements Screen {
 
         player.update(delta);
 
-        gamecam.position.x = player.b2body.getPosition().x;
+        gamecam.position.x = (float)Math.round(player.b2body.getPosition().x*100f)/100f;
         if( gamecam.position.y - player.b2body.getPosition().y > 1 || player.b2body.getPosition().y - gamecam.position.y  > 1)
             gamecam.position.y = player.b2body.getPosition().y;
 
@@ -163,6 +182,10 @@ public class PlayScreen implements Screen {
     @Override
     public void hide() {
 
+    }
+
+    public void playerAction(InteractiveTileObject tile){
+            tile.playerAction();
     }
 
     @Override

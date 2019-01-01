@@ -125,26 +125,27 @@ public class Player extends Sprite {
 
         FixtureDef fdef = new FixtureDef();
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(16/Constants.PPM,16/Constants.PPM);
+        CircleShape circle = new CircleShape();
+        circle.setRadius(15/Constants.PPM);
         fdef.filter.categoryBits = Constants.BIT_PLAYER;
         fdef.filter.maskBits = Constants.BIT_ENEMY | Constants.BIT_GROUND | Constants.BIT_TREE;
 
-        fdef.shape = shape;
+        fdef.shape = circle;
         b2body.createFixture(fdef).setUserData("player");
 
         PolygonShape sensorShape = new PolygonShape();
 
         //foot Sensor
-        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(0,-16/Constants.PPM),0);
+        sensorShape.setAsBox((float) (0.1/Constants.PPM), (float) (0.1/Constants.PPM), new Vector2(0,-16/Constants.PPM),0);
         fdef.shape = sensorShape;
         fdef.isSensor = true;
-        b2body.createFixture(fdef).setUserData("footSensor");
+        b2body.createFixture(fdef).setUserData("downSensor");
 
         //head Sensor
         sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(0,16/Constants.PPM),0);
         fdef.shape = sensorShape;
         fdef.isSensor = true;
-        b2body.createFixture(fdef).setUserData("headSensor");
+        b2body.createFixture(fdef).setUserData("upSensor");
 
         //right Sensor
         sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(16/Constants.PPM,0),0);
@@ -157,31 +158,14 @@ public class Player extends Sprite {
         fdef.shape = sensorShape;
         fdef.isSensor = true;
         b2body.createFixture(fdef).setUserData("leftSensor");
+    }
 
-        //up-right Sensor
-        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(22/Constants.PPM,22/Constants.PPM),0);
-        fdef.shape = sensorShape;
-        fdef.isSensor = true;
-        b2body.createFixture(fdef).setUserData("upRightSensor");
+    public void setFaceRight(boolean faceRight){
+        this.faceRight = faceRight;
+    }
 
-        //down-right Sensor
-        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(22/Constants.PPM,-22/Constants.PPM),0);
-        fdef.shape = sensorShape;
-        fdef.isSensor = true;
-        b2body.createFixture(fdef).setUserData("downRightSensor");
-
-        //down-left Sensor
-        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(-22/Constants.PPM,-22/Constants.PPM),0);
-        fdef.shape = sensorShape;
-        fdef.isSensor = true;
-        b2body.createFixture(fdef).setUserData("downLeftSensor");
-
-        //up-left Sensor
-        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(-22/Constants.PPM,22/Constants.PPM),0);
-        fdef.shape = sensorShape;
-        fdef.isSensor = true;
-        b2body.createFixture(fdef).setUserData("upLeftSensor");
-
+    public boolean isFacingRight(){
+        return faceRight;
     }
 
 }

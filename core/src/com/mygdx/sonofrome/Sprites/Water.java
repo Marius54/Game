@@ -14,7 +14,7 @@ public class Water extends InteractiveTileObject {
     }
 
     @Override
-    public void lovit() {
+    public void playerAction() {
 
     }
 }
