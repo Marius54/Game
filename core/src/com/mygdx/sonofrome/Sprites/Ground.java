@@ -3,6 +3,7 @@ package com.mygdx.sonofrome.Sprites;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.World;
+import com.mygdx.sonofrome.Screens.PlayScreen;
 import com.mygdx.sonofrome.Tools.Constants;
 
 public class Ground extends InteractiveTileObject {
@@ -17,12 +18,14 @@ public class Ground extends InteractiveTileObject {
     }
 
     @Override
-    public void playerAction() {
+    public boolean playerAction() {
         if(life == 0) {
             getCell(4).setTile(null);
             setCategoryFilter(Constants.BIT_DEFAULT);
-        }else{
-            life--;
+            PlayScreen.getInstance().getHud().addUndergroundResources(10);
+            return true;
         }
+        life--;
+        return false;
     }
 }

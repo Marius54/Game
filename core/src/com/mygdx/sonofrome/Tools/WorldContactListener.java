@@ -14,6 +14,7 @@ public class WorldContactListener  implements ContactListener {
     private PlayScreen game;
     private InteractiveTileObject rightTile,leftTile,upTile,downTile;
     Fixture player = null , object = null;
+    private String previousContact;
 
     public WorldContactListener(PlayScreen game){
         this.game = game;
@@ -32,7 +33,6 @@ public class WorldContactListener  implements ContactListener {
                 object = fixA;
             }
             if (player.getUserData().equals("rightSensor")) {
-                System.out.println("right");
                 rightContact = true;
                 leftContact = false;
             } else if (player.getUserData().equals("leftSensor")) {
@@ -40,9 +40,12 @@ public class WorldContactListener  implements ContactListener {
                 rightContact = false;
             } else if (player.getUserData().equals("upSensor")) {
                 upContact = true;
+                leftContact = false;
+                rightContact = false;
             } else if (player.getUserData().equals("downSensor")) {
-                System.out.println("down");
                 downContact = true;
+                leftContact = false;
+                rightContact = false;
             }
             if (player.getUserData().equals("rightSensor")) {
                 rightContact = true;
@@ -57,7 +60,6 @@ public class WorldContactListener  implements ContactListener {
                 upTile = null;
                 upTile = (InteractiveTileObject) object.getUserData();
             } else if (player.getUserData().equals("downSensor")) {
-                System.out.println("downTile");
                 downContact = true;
                 downTile = null;
                 downTile = (InteractiveTileObject) object.getUserData();
@@ -67,16 +69,6 @@ public class WorldContactListener  implements ContactListener {
 
     @Override
     public void endContact(Contact contact) {
-        Fixture fixA = contact.getFixtureA();
-        Fixture fixB = contact.getFixtureB();
-//        if(fixA.getUserData() != null && fixB.getUserData() != null) {
-//            if (fixA.getUserData().toString().toLowerCase().contains("sensor")) {
-//                player = fixA;
-//                object = fixB;
-//            } else if (fixB.getUserData().toString().toLowerCase().contains("sensor")) {
-//                player = fixB;
-//                object = fixA;
-//            }
     }
 
     @Override
@@ -93,10 +85,6 @@ public class WorldContactListener  implements ContactListener {
         return rightContact;
     }
 
-    public InteractiveTileObject getRightTile(){
-        return rightTile;
-    }
-
     public boolean isLeftContact() {
         return leftContact;
     }
@@ -107,6 +95,26 @@ public class WorldContactListener  implements ContactListener {
 
     public boolean isDownContact() {
         return downContact;
+    }
+
+    public void setRightContact(boolean contact){
+        rightContact = contact;
+    }
+
+    public void setLeftContact(boolean contact){
+        leftContact = contact;
+    }
+
+    public void setDownContact(boolean contact){
+        downContact = contact;
+    }
+
+    public void setUpContact(boolean contact){
+        upContact = contact;
+    }
+
+    public InteractiveTileObject getRightTile(){
+        return rightTile;
     }
 
     public InteractiveTileObject getLeftTile() {

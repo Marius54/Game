@@ -14,7 +14,7 @@ public class Water extends InteractiveTileObject {
     }
 
     @Override
-    public void playerAction() {
-
+    public boolean playerAction() {
+        return true;
     }
 }

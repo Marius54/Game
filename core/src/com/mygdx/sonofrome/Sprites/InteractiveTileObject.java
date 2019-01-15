@@ -56,5 +56,5 @@ public abstract class InteractiveTileObject {
         return layer. getCell ((int)(body.getPosition().x * Constants.PPM / 32),
                 (int)(body.getPosition().y * Constants.PPM / 32));
     }
-    public abstract void playerAction();
+    public abstract boolean playerAction();
 }

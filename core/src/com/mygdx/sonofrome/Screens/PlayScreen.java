@@ -4,13 +4,26 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.Filter;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.sonofrome.Scenes.Hud;
@@ -20,6 +33,10 @@ import com.mygdx.sonofrome.Sprites.Player;
 import com.mygdx.sonofrome.Tools.B2WorldCreator;
 import com.mygdx.sonofrome.Tools.Constants;
 import com.mygdx.sonofrome.Tools.WorldContactListener;
+
+import java.awt.Panel;
+
+import javafx.scene.layout.Pane;
 
 public class PlayScreen implements Screen {
 
@@ -42,6 +59,9 @@ public class PlayScreen implements Screen {
     private WorldContactListener contact;
 
     private static PlayScreen instance = null;
+
+    public TextureRegion tilereg;
+    public Texture tile;
 
     public static PlayScreen getInstance(){
         if(instance == null){
@@ -66,7 +86,7 @@ public class PlayScreen implements Screen {
 
         world = new World(new Vector2(0,-32), true);
         b2dr = new Box2DDebugRenderer();
-//        b2dr.setDrawBodies(false);
+        b2dr.setDrawBodies(false);
 
         new B2WorldCreator(world, map);
 
@@ -81,9 +101,52 @@ public class PlayScreen implements Screen {
         return atlas;
     }
 
+    public void addCell(int x,int y){
+        MapObject object = new MapObject();
+        tile = new Texture(Gdx.files.internal("Map//wood.png"));
+        tilereg = new TextureRegion(tile);
+        TiledMapTileLayer layer1 = new TiledMapTileLayer(32, 32, 32, 32);
+        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(4);
+        TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+        cell.setTile(new StaticTiledMapTile(tilereg));
+        layer.setCell(x,y , cell);
+        map.getLayers().get(1).getObjects().add(object);
+
+        MapObject object = new MapObject();
+        
+        Body body;
+        Fixture fixture;
+        BodyDef bdef = new BodyDef();
+        FixtureDef fdef = new FixtureDef();
+        PolygonShape shape = new PolygonShape();
+        Filter filter = new Filter();
+
+        bdef.type = BodyDef.BodyType.StaticBody;
+        bdef.position.set((x*32+16) / Constants.PPM,(y*32+16)/ Constants.PPM);
+
+        body = world.createBody(bdef);
+
+        shape.setAsBox(16 / Constants.PPM, 16 / Constants.PPM);
+        fdef.shape = shape;
+        fixture = body.createFixture(fdef);
+        filter.categoryBits = Constants.BIT_GROUND;
+        fixture.setFilterData(filter);
+        map.getLayers().get(1).getObjects().add(body);
+    }
+
     public void handleInput(float dt){
         float velX = 0, velY = 0;
 
+        if(hud.isActionPressed() && idle()){
+            if(player.isFacingRight() && !contact.isRightContact()){
+                addCell((int)(player.getX()* Constants.PPM /32+2),(int)(player.getY()* Constants.PPM /32+1));
+            }else if(!player.isFacingRight() && !contact.isLeftContact()){
+                addCell((int)(player.getX()* Constants.PPM /32-1),(int)(player.getY()* Constants.PPM /32+1));
+            }
+        }
+        if(hud.isBuildPressed()){
+            openBuildMenu();
+        }
         if(hud.isRightPressed()){
             player.setFaceRight(true);
         }
@@ -100,16 +163,35 @@ public class PlayScreen implements Screen {
         if(hud.isActionPressed() && idle()){
 //            System.out.println(contact.isDownContact()+" "+contact.isUpContact()+" "+contact.isLeftContact()+" "+contact.isRightContact());
             if(contact.isDownContact() && hud.isDownPressed() ) {
-                playerAction(contact.getDownTile());
+                boolean downTile = playerAction(contact.getDownTile());
+                if(downTile){
+                    contact.setDownContact(false);
+                }
             }else if(contact.isUpContact() && hud.isUpPressed()) {
-                playerAction(contact.getUpTile());
-            }else if(!player.isFacingRight() && (contact.isLeftContact() || (contact.isLeftContact() && hud.isLeftPressed()))) {
-                playerAction(contact.getLeftTile());
-            }else if(player.isFacingRight() && (contact.isRightContact() || (contact.isRightContact() && hud.isRightPressed()))) {
-                playerAction(contact.getRightTile());
+                boolean upTile = playerAction(contact.getUpTile());
+                if(upTile){
+                    contact.setUpContact(false);
+                }
+            }else if(!player.isFacingRight() && (contact.isLeftContact() || (contact.isLeftContact() && hud.isLeftPressed())) && contact.getLeftTile() != null ) {
+                boolean leftTile = playerAction(contact.getLeftTile());
+                if(leftTile){
+                    contact.setLeftContact(false);
+                }
+            }else if(player.isFacingRight() && (contact.isRightContact() || (contact.isRightContact() && hud.isRightPressed())) && contact.getRightTile() != null) {
+                boolean rightTile = playerAction(contact.getRightTile());
+                if(rightTile){
+                    contact.setRightContact(false);
+                }
             }
         }
         player.b2body.setLinearVelocity(velX, velY);
+    }
+
+    public void setCurrentBlock(int type){
+        player.setCurrentBlock(type);
+    }
+    public void openBuildMenu(){
+
     }
 
     public boolean idle(){
@@ -141,7 +223,6 @@ public class PlayScreen implements Screen {
 
     @Override
     public void show() {
-
     }
 
     @Override
@@ -184,8 +265,12 @@ public class PlayScreen implements Screen {
 
     }
 
-    public void playerAction(InteractiveTileObject tile){
-            tile.playerAction();
+    public boolean playerAction(InteractiveTileObject tile){
+        boolean destroyed = tile.playerAction();
+        if(destroyed) {
+            return true;
+        }
+        return false;
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.mygdx.sonofrome;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.mygdx.sonofrome.Screens.MainMenuScreen;
 import com.mygdx.sonofrome.Screens.PlayScreen;
 
 public class SonOfRome extends Game {
@@ -21,7 +23,7 @@ public class SonOfRome extends Game {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		setScreen(PlayScreen.getInstance());
+		setScreen(MainMenuScreen.getInstance());
 	}
 
 	@Override

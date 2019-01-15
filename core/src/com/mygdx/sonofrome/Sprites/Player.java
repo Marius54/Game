@@ -3,20 +3,16 @@ package com.mygdx.sonofrome.Sprites;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.sonofrome.Scenes.Hud;
 import com.mygdx.sonofrome.Screens.PlayScreen;
-import com.mygdx.sonofrome.SonOfRome;
 import com.mygdx.sonofrome.Tools.Constants;
 
 public class Player extends Sprite {
@@ -32,6 +28,7 @@ public class Player extends Sprite {
     private Animation playerHit;
     private float stateTimer;
     private boolean faceRight;
+    private int currentBlock;
 
 
 
@@ -126,7 +123,7 @@ public class Player extends Sprite {
         FixtureDef fdef = new FixtureDef();
         PolygonShape shape = new PolygonShape();
         CircleShape circle = new CircleShape();
-        circle.setRadius(15/Constants.PPM);
+        circle.setRadius(12/Constants.PPM);
         fdef.filter.categoryBits = Constants.BIT_PLAYER;
         fdef.filter.maskBits = Constants.BIT_ENEMY | Constants.BIT_GROUND | Constants.BIT_TREE;
 
@@ -136,25 +133,25 @@ public class Player extends Sprite {
         PolygonShape sensorShape = new PolygonShape();
 
         //foot Sensor
-        sensorShape.setAsBox((float) (0.1/Constants.PPM), (float) (0.1/Constants.PPM), new Vector2(0,-16/Constants.PPM),0);
+        sensorShape.setAsBox((float) (0.1/Constants.PPM), (float) (0.1/Constants.PPM), new Vector2(0,-12/Constants.PPM),0);
         fdef.shape = sensorShape;
         fdef.isSensor = true;
         b2body.createFixture(fdef).setUserData("downSensor");
 
         //head Sensor
-        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(0,16/Constants.PPM),0);
+        sensorShape.setAsBox((float) (0.1/Constants.PPM),(float) (0.1/Constants.PPM), new Vector2(0,12/Constants.PPM),0);
         fdef.shape = sensorShape;
         fdef.isSensor = true;
         b2body.createFixture(fdef).setUserData("upSensor");
 
         //right Sensor
-        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(16/Constants.PPM,0),0);
+        sensorShape.setAsBox((float) (0.1/Constants.PPM),(float) (0.1/Constants.PPM), new Vector2(12/Constants.PPM,0),0);
         fdef.shape = sensorShape;
         fdef.isSensor = true;
         b2body.createFixture(fdef).setUserData("rightSensor");
 
         //left Sensor
-        sensorShape.setAsBox(2/Constants.PPM,2/Constants.PPM, new Vector2(-16/Constants.PPM,0),0);
+        sensorShape.setAsBox((float) (0.1/Constants.PPM),(float) (0.1/Constants.PPM), new Vector2(-12/Constants.PPM,0),0);
         fdef.shape = sensorShape;
         fdef.isSensor = true;
         b2body.createFixture(fdef).setUserData("leftSensor");
@@ -167,5 +164,14 @@ public class Player extends Sprite {
     public boolean isFacingRight(){
         return faceRight;
     }
+
+    public int getCurrentBlock() {
+        return currentBlock;
+    }
+
+    public void setCurrentBlock(int currentBlock) {
+        this.currentBlock = currentBlock;
+    }
+
 
 }
