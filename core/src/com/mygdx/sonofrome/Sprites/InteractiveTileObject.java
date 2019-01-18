@@ -11,6 +11,8 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.sonofrome.Screens.PlayScreen;
 import com.mygdx.sonofrome.SonOfRome;
 import com.mygdx.sonofrome.Tools.Constants;
@@ -20,9 +22,8 @@ public abstract class InteractiveTileObject {
     private TiledMap map;
     private TiledMapTile tile;
     private Rectangle bounds;
-    private Body body;
-//    protected PlayScreen game = PlayScreen.getInstance();
-
+    protected Body body;
+    protected BodyDef bdef;
     protected Fixture fixture;
 
     public InteractiveTileObject(World world, TiledMap map, Rectangle bounds)
@@ -31,7 +32,7 @@ public abstract class InteractiveTileObject {
         this.map = map;
         this.bounds = bounds;
 
-        BodyDef bdef = new BodyDef();
+        bdef = new BodyDef();
         FixtureDef fdef = new FixtureDef();
         PolygonShape shape = new PolygonShape();
 
@@ -57,4 +58,8 @@ public abstract class InteractiveTileObject {
                 (int)(body.getPosition().y * Constants.PPM / 32));
     }
     public abstract boolean playerAction();
+
+    public void destroyBody() {
+        this.world.destroyBody(body);
+    }
 }

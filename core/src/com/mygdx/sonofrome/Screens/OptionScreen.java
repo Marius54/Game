@@ -3,36 +3,34 @@ package com.mygdx.sonofrome.Screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.sonofrome.SonOfRome;
-import com.mygdx.sonofrome.Tools.B2WorldCreator;
 import com.mygdx.sonofrome.Tools.Constants;
 
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
-import static com.badlogic.gdx.graphics.Texture.TextureWrap.Repeat;
-
-public class MainMenuScreen implements Screen {
-    public static MainMenuScreen instance = null;
+public class OptionScreen implements Screen {
+    public static OptionScreen instance = null;
     private TextureAtlas atlas;
     private OrthographicCamera gamecam;
     private Viewport gamePort;
@@ -46,24 +44,34 @@ public class MainMenuScreen implements Screen {
     AtomicIntegerFieldUpdater<String> assetManager;
     private Texture texture;
     private TextureRegion region;
-    private Music music;
+    Image girlImg,boyImg;
+    TextButton playButton;
 
-    public static MainMenuScreen getInstance(){
+    public static int playerType = 2;
+
+    public static String filePath;
+
+    public static OptionScreen getInstance(){
         if(instance == null){
-            instance = new MainMenuScreen();
+            instance = new OptionScreen();
         }
         return instance;
     }
-    
-    private MainMenuScreen(){
+
+    private OptionScreen(){
 
         skin = new Skin(Gdx.files.internal("uiskin.json"));
-        music = Gdx.audio.newMusic(Gdx.files.internal("audio/background.mp3"));
+        if(playerType == 1){
+            filePath = "pack/pack.pack";
+        }else{
+            filePath = "packGirl/pack.pack";
+        }
+        playButton = new TextButton("Main Menu", skin);
+        boyImg = new Image(new Texture("pack//boy.png"));
+        girlImg = new Image(new Texture("packGirl//girl.png"));
         gamecam = new OrthographicCamera();
         gamePort = new FitViewport(Constants.V_WIDTH,Constants.V_HEIGHT , new OrthographicCamera());
-        music.setLooping(true);
-        music.setVolume(0.5f);
-        music.play();
+
         gamecam.position.set(gamePort.getWorldWidth()/2,gamePort.getWorldHeight()*3, 0);
 
         stage = new Stage(gamePort, SonOfRome.getInstance().batch);
@@ -73,44 +81,72 @@ public class MainMenuScreen implements Screen {
     public void show() {
         Gdx.input.setInputProcessor(stage);
 
+//        public static final int V_WIDTH = 640;
+//        public static final int V_HEIGHT = 384;
+
         //Create buttons
-        TextButton playButton = new TextButton("Play", skin);
-        playButton.setPosition(270,300);
+
+        girlImg.setSize(48, 48);
+        girlImg.setPosition(362,200);
+        girlImg.addListener(new InputListener() {
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                filePath = "packGirl/pack.pack";
+                playerType = 2;
+                changeImage();
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+            }
+        });
+
+
+        boyImg.setPosition(192,200);
+        boyImg.setSize(48, 48);
+        boyImg.addListener(new InputListener() {
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                filePath = "pack/pack.pack";
+                playerType = 1;
+                changeImage();
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+            }
+        });
+
+
+        playButton.setPosition(360,50);
         playButton.setSize(100,50);
         playButton.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                ((Game)Gdx.app.getApplicationListener()).setScreen(PlayScreen.getInstance());
-                Gdx.input.setInputProcessor(PlayScreen.getInstance().getHud().stage);
+                ((Game)Gdx.app.getApplicationListener()).setScreen(MainMenuScreen.getInstance());
+                Gdx.input.setInputProcessor(MainMenuScreen.getInstance().stage);
             }
         });
 
-        TextButton optionsButton = new TextButton("Options", skin);
-        optionsButton.setPosition(245,200);
-        optionsButton.setSize(150,50);
-        optionsButton.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                ((Game)Gdx.app.getApplicationListener()).setScreen(OptionScreen.getInstance());
-                Gdx.input.setInputProcessor(OptionScreen.getInstance().stage);
-            }
-        });
-
-        TextButton exitButton = new TextButton("Exit", skin);
-        exitButton.setPosition(270,100);
-        exitButton.setSize(100,50);
-        exitButton.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.exit();
-            }
-        });
-
+        changeImage();
+        stage.addActor(girlImg);
+        stage.addActor(boyImg);
         stage.addActor(playButton);
-        stage.addActor(optionsButton);
-        stage.addActor(exitButton);
     }
 
+    public void changeImage() {
+        if(playerType == 1){
+            boyImg.setDrawable(new SpriteDrawable(new Sprite(new Texture("pack//boySelected.png"))));
+            girlImg.setDrawable(new SpriteDrawable(new Sprite(new Texture("packGirl//girl.png"))));
+        }else{
+            boyImg.setDrawable(new SpriteDrawable(new Sprite(new Texture("pack//boy.png"))));
+            girlImg.setDrawable(new SpriteDrawable(new Sprite(new Texture("packGirl//girlSelected.png"))));
+        }
+    }
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(.1f, .12f, .18f, 1);
@@ -152,6 +188,5 @@ public class MainMenuScreen implements Screen {
         renderer.dispose();
         world.dispose();
         b2dr.dispose();
-        music.dispose();
     }
 }

@@ -6,17 +6,14 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.sonofrome.Screens.PlayScreen;
 import com.mygdx.sonofrome.Tools.Constants;
 
-public class Ground extends InteractiveTileObject {
+public class StoneBlock extends InteractiveTileObject {
     int life = 50;
 
-    public Ground(World world, TiledMap map, Rectangle bounds) {
+    public StoneBlock(World world, TiledMap map, Rectangle bounds){
         super(world, map, bounds);
         fixture.setUserData(this);
-        setCategoryFilter(Constants.BIT_GROUND);
-
-
+        setCategoryFilter(Constants.BIT_STONEBLOCK);
     }
-
     @Override
     public boolean playerAction() {
         if(life == 0) {

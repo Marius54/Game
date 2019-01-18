@@ -17,4 +17,6 @@ public class Water extends InteractiveTileObject {
     public boolean playerAction() {
         return true;
     }
+
+
 }

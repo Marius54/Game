@@ -2,6 +2,7 @@ package com.mygdx.sonofrome.Screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,30 +14,31 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.Filter;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.sonofrome.Scenes.Hud;
 import com.mygdx.sonofrome.SonOfRome;
 import com.mygdx.sonofrome.Sprites.InteractiveTileObject;
 import com.mygdx.sonofrome.Sprites.Player;
+import com.mygdx.sonofrome.Sprites.StoneBlock;
+import com.mygdx.sonofrome.Sprites.WoodBlock;
 import com.mygdx.sonofrome.Tools.B2WorldCreator;
 import com.mygdx.sonofrome.Tools.Constants;
 import com.mygdx.sonofrome.Tools.WorldContactListener;
 
-import java.awt.Panel;
 
-import javafx.scene.layout.Pane;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import box2dLight.Light;
+import box2dLight.PointLight;
+import box2dLight.RayHandler;
 
 public class PlayScreen implements Screen {
 
@@ -60,8 +62,15 @@ public class PlayScreen implements Screen {
 
     private static PlayScreen instance = null;
 
+    public int dummyInteger = 0;
+
     public TextureRegion tilereg;
     public Texture tile;
+
+    private RayHandler rayHandler;
+    private Light light;
+
+//    private Sound axeSound;
 
     public static PlayScreen getInstance(){
         if(instance == null){
@@ -73,7 +82,7 @@ public class PlayScreen implements Screen {
     private PlayScreen(){
 
         this.game = SonOfRome.getInstance();
-        atlas = new TextureAtlas("pack/pack.pack");
+        atlas = new TextureAtlas(OptionScreen.getInstance().filePath);
 
         gamecam = new OrthographicCamera();
         gamePort = new FitViewport(Constants.V_WIDTH / Constants.PPM,Constants.V_HEIGHT / Constants.PPM,gamecam);
@@ -95,56 +104,83 @@ public class PlayScreen implements Screen {
         contact = new WorldContactListener(this);
 
         world.setContactListener(contact);
+
+        rayHandler = new RayHandler(world);
+        rayHandler.setAmbientLight(1);
+        light = new PointLight(rayHandler, 5, Color.WHITE,100/Constants.PPM,0,25*32/Constants.PPM);
+        light.attachToBody(player.b2body);
+        System.out.print(light.getX()+"  "+ light.getY()+"  "+player.bdef.position.x+"   "+player.bdef.position.y);
+
+//        axeSound = Gdx.audio.newSound(Gdx.files.internal("audio/axeSoundEffect.mp3"));
+
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                hud.substractFood(5);
+                hud.substractWater(5);
+            }
+        }, 0, 5000);
     }
+
+
 
     public TextureAtlas getAtlas(){
         return atlas;
     }
 
     public void addCell(int x,int y){
-        MapObject object = new MapObject();
-        tile = new Texture(Gdx.files.internal("Map//wood.png"));
-        tilereg = new TextureRegion(tile);
-        TiledMapTileLayer layer1 = new TiledMapTileLayer(32, 32, 32, 32);
-        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(4);
-        TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
-        cell.setTile(new StaticTiledMapTile(tilereg));
-        layer.setCell(x,y , cell);
-        map.getLayers().get(1).getObjects().add(object);
+        boolean build = true;
+        boolean first = true;
+        Array<Body> worldBodies = new Array();
+        world.getBodies(worldBodies);
+        for(int i = 0; i < worldBodies.size; i++)
+        {
+            if(worldBodies.get(i).getPosition().x == (x * 32  + 16)/Constants.PPM && worldBodies.get(i).getPosition().y == (y * 32 + 16)/Constants.PPM){
+                build = false;
+            }
+        }
 
-        MapObject object = new MapObject();
-        
-        Body body;
-        Fixture fixture;
-        BodyDef bdef = new BodyDef();
-        FixtureDef fdef = new FixtureDef();
-        PolygonShape shape = new PolygonShape();
-        Filter filter = new Filter();
-
-        bdef.type = BodyDef.BodyType.StaticBody;
-        bdef.position.set((x*32+16) / Constants.PPM,(y*32+16)/ Constants.PPM);
-
-        body = world.createBody(bdef);
-
-        shape.setAsBox(16 / Constants.PPM, 16 / Constants.PPM);
-        fdef.shape = shape;
-        fixture = body.createFixture(fdef);
-        filter.categoryBits = Constants.BIT_GROUND;
-        fixture.setFilterData(filter);
-        map.getLayers().get(1).getObjects().add(body);
+        if(build == true) {
+            if (this.player.getCurrentBlock() == 1) {
+                MapObject object = new MapObject();
+                tile = new Texture(Gdx.files.internal("Map//wood.png"));
+                tilereg = new TextureRegion(tile);
+                TiledMapTileLayer layer1 = new TiledMapTileLayer(32, 32, 32, 32);
+                TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(4);
+                TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+                cell.setTile(new StaticTiledMapTile(tilereg));
+                layer.setCell(x, y, cell);
+                map.getLayers().get(1).getObjects().add(object);
+                Rectangle rect = new Rectangle(x * 32 , y * 32 , 32, 32);
+                new WoodBlock(world,map, rect);
+            } else if (player.getCurrentBlock() == 2) {
+                MapObject object = new MapObject();
+                tile = new Texture(Gdx.files.internal("Map//stoneWall.png"));
+                tilereg = new TextureRegion(tile);
+                TiledMapTileLayer layer1 = new TiledMapTileLayer(32, 32, 32, 32);
+                TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(4);
+                TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+                cell.setTile(new StaticTiledMapTile(tilereg));
+                layer.setCell(x, y, cell);
+                map.getLayers().get(1).getObjects().add(object);
+                Rectangle rect = new Rectangle(x * 32 , y * 32 , 32, 32);
+                new StoneBlock(world,map, rect);
+            }
+        }
     }
 
     public void handleInput(float dt){
         float velX = 0, velY = 0;
 
-        if(hud.isActionPressed() && idle()){
+        if(hud.isBuildPressed() && idle()){
             if(player.isFacingRight() && !contact.isRightContact()){
                 addCell((int)(player.getX()* Constants.PPM /32+2),(int)(player.getY()* Constants.PPM /32+1));
             }else if(!player.isFacingRight() && !contact.isLeftContact()){
                 addCell((int)(player.getX()* Constants.PPM /32-1),(int)(player.getY()* Constants.PPM /32+1));
             }
         }
-        if(hud.isBuildPressed()){
+        if(hud.isInventoryPressed()){
             openBuildMenu();
         }
         if(hud.isRightPressed()){
@@ -154,14 +190,13 @@ public class PlayScreen implements Screen {
             player.setFaceRight(false);
         }
         if(hud.isUpPressed() && player.b2body.getLinearVelocity().y == 0 ) {
-            velY = 20.0f ;
+            velY = 25.0f ;
         } else if(hud.isRightPressed() && player.b2body.getPosition().x < 46) {
             velX = 2.0f;
         } else if(hud.isLeftPressed() && player.b2body.getPosition().x > 4) {
             velX = -2.0f;
         }
         if(hud.isActionPressed() && idle()){
-//            System.out.println(contact.isDownContact()+" "+contact.isUpContact()+" "+contact.isLeftContact()+" "+contact.isRightContact());
             if(contact.isDownContact() && hud.isDownPressed() ) {
                 boolean downTile = playerAction(contact.getDownTile());
                 if(downTile){
@@ -185,7 +220,21 @@ public class PlayScreen implements Screen {
             }
         }
         player.b2body.setLinearVelocity(velX, velY);
+
+        if((player.b2body.getPosition().x < 5 && player.b2body.getPosition().y < 10) || (player.b2body.getPosition().x > 46 && player.b2body.getPosition().y < 10)){
+
+            try {
+                Thread.sleep(40);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if(player.b2body.getPosition().y < 9.5){
+                hud.decreaseLife();
+            }
+        }
+
     }
+
 
     public void setCurrentBlock(int type){
         player.setCurrentBlock(type);
@@ -212,13 +261,15 @@ public class PlayScreen implements Screen {
         world.step(1/60f,6,2);
 
         player.update(delta);
-
-        gamecam.position.x = (float)Math.round(player.b2body.getPosition().x*100f)/100f;
+//        gamecam.position.x = RoundTo.RoundToNearest(player.b2body.getPosition().x,.2f);
+        gamecam.position.x = (float)Math.round(player.b2body.getPosition().x*50f)/50f;
         if( gamecam.position.y - player.b2body.getPosition().y > 1 || player.b2body.getPosition().y - gamecam.position.y  > 1)
-            gamecam.position.y = player.b2body.getPosition().y;
+            gamecam.position.y = (int)player.b2body.getPosition().y;
 
         gamecam.update();
+
         renderer.setView(gamecam);
+//        rayHandler.update();
     }
 
     @Override
@@ -228,10 +279,11 @@ public class PlayScreen implements Screen {
     @Override
     public void render(float delta) {
         update(delta);
-        Gdx.gl.glClearColor(0,0,0,1);
+        Gdx.gl.glClearColor(0,0,0,1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+//        rayHandler.updateAndRender();
         renderer.render();
+
 
         b2dr.render(world, gamecam.combined);
 
@@ -241,7 +293,12 @@ public class PlayScreen implements Screen {
         game.batch.end();
 
         game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
+
         hud.stage.draw();
+//        rayHandler.updateAndRender();
+//        rayHandler.setCombinedMatrix(gamecam.combined.cpy().scl(Constants.PPM));
+//        rayHandler.updateAndRender();
+
     }
 
     @Override
@@ -266,7 +323,13 @@ public class PlayScreen implements Screen {
     }
 
     public boolean playerAction(InteractiveTileObject tile){
-        boolean destroyed = tile.playerAction();
+        boolean destroyed = false;
+        try {
+            destroyed = tile.playerAction();
+
+        }catch(Exception e){
+
+            }
         if(destroyed) {
             return true;
         }
@@ -280,5 +343,6 @@ public class PlayScreen implements Screen {
         world.dispose();
         b2dr.dispose();
         hud.dispose();
+        light.dispose();
     }
 }

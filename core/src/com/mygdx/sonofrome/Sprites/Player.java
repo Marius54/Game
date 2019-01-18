@@ -1,5 +1,6 @@
 package com.mygdx.sonofrome.Sprites;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -12,8 +13,11 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.sonofrome.Scenes.Hud;
+import com.mygdx.sonofrome.Screens.OptionScreen;
 import com.mygdx.sonofrome.Screens.PlayScreen;
 import com.mygdx.sonofrome.Tools.Constants;
+
+import java.io.OptionalDataException;
 
 public class Player extends Sprite {
     public enum State {RUNNING, STANDING, JUMPING, HITTING};
@@ -29,11 +33,11 @@ public class Player extends Sprite {
     private float stateTimer;
     private boolean faceRight;
     private int currentBlock;
-
+    public BodyDef bdef;
 
 
     public Player(World world, PlayScreen screen, Hud hud){
-        super(screen.getAtlas().findRegion("boy"));
+        super(screen.getAtlas().findRegion("player"));
         this.world = world;
         this.screen = screen;
         currentState = State.STANDING;
@@ -43,22 +47,37 @@ public class Player extends Sprite {
 
         Array<TextureRegion> frames = new Array<TextureRegion>();
         for(int i = 0; i < 3; i++){
-            frames.add(new TextureRegion(getTexture(),i*32,227,32,32));
+            if(OptionScreen.getInstance().playerType == 2){
+                frames.add(new TextureRegion(getTexture(), (i+6) * 32, 259, 32, 32));
+            }else {
+                frames.add(new TextureRegion(getTexture(), i * 32, 227, 32, 32));
+            }
         }
 
         playerRun = new Animation(0.1f,frames);
 
         frames = new Array<TextureRegion>();
         for(int i = 3; i < 6; i++){
-            frames.add(new TextureRegion(getTexture(),i*32,227,32,32));
+            if(OptionScreen.getInstance().playerType == 2){
+                frames.add(new TextureRegion(getTexture(), (i+6) * 32, 259, 32, 32));
+            }else {
+                frames.add(new TextureRegion(getTexture(), i * 32, 227, 32, 32));
+            }
         }
 
         playerHit = new Animation(0.1f,frames);
-
-        playerJump = new TextureRegion(getTexture(),32,259,32,32);
+        if(OptionScreen.getInstance().playerType == 2) {
+            playerJump = new TextureRegion(getTexture(), 192, 259, 32, 32);
+        }else{
+            playerJump = new TextureRegion(getTexture(), 32, 259, 32, 32);
+        }
 
         definePlayer();
-        playerStand = new TextureRegion(getTexture(), 32, 195,32,32 );
+        if(OptionScreen.getInstance().playerType == 2) {
+            playerStand = new TextureRegion(getTexture(), 192, 195,32,32 );
+        }else{
+            playerStand = new TextureRegion(getTexture(), 32, 195,32,32 );
+        }
         setBounds(0,0,32/Constants.PPM,32/Constants.PPM);
         setRegion(playerStand);
 
@@ -115,7 +134,7 @@ public class Player extends Sprite {
     }
 
     public void definePlayer(){
-        BodyDef bdef = new BodyDef();
+        bdef = new BodyDef();
         bdef.position.set(524/ Constants.PPM,1010/ Constants.PPM);
         bdef.type = BodyDef.BodyType.DynamicBody;
         b2body = world.createBody(bdef);
@@ -125,7 +144,7 @@ public class Player extends Sprite {
         CircleShape circle = new CircleShape();
         circle.setRadius(12/Constants.PPM);
         fdef.filter.categoryBits = Constants.BIT_PLAYER;
-        fdef.filter.maskBits = Constants.BIT_ENEMY | Constants.BIT_GROUND | Constants.BIT_TREE;
+        fdef.filter.maskBits = Constants.BIT_ENEMY | Constants.BIT_GROUND | Constants.BIT_TREE | Constants.BIT_WOODBLOCK;
 
         fdef.shape = circle;
         b2body.createFixture(fdef).setUserData("player");

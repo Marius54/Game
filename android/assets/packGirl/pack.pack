@@ -3,14 +3,14 @@ pack.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-player
+boy
   rotate: false
   xy: 1, 195
   size: 192, 256
   orig: 192, 256
   offset: 0, 0
   index: -1
-girl
+player
   rotate: false
   xy: 195, 195
   size: 192, 256

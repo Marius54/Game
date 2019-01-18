@@ -1,10 +1,10 @@
 package com.mygdx.sonofrome.Scenes;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -13,12 +13,13 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.mygdx.sonofrome.Screens.GameOverScreen;
+import com.mygdx.sonofrome.Screens.MainMenuScreen;
+import com.mygdx.sonofrome.Screens.OptionScreen;
 import com.mygdx.sonofrome.Screens.PlayScreen;
 import com.mygdx.sonofrome.Tools.BackgroundColor;
 import com.mygdx.sonofrome.Tools.Constants;
@@ -31,7 +32,7 @@ public class Hud implements Disposable {
     private static Integer life,water,food,wood,udergroundResources;
     private Label lifeLabel,lifeTextLabel,waterLabel,waterTextLabel,foodLabel,foodTextLabel,woodLabel,
             woodTextLabel,undergroundResourcesLabel,undergroundResourcesTextLabel,playerLabel;
-    boolean upPressed, downPressed, leftPressed, rightPressed, actionPressed,buildPressed;
+    boolean upPressed, downPressed, leftPressed, rightPressed, actionPressed, inventoryPressed,buildPress;
 
     public Hud(SpriteBatch sb){
         life = 100;
@@ -128,6 +129,7 @@ public class Hud implements Disposable {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 PlayScreen.getInstance().setCurrentBlock(1);
+                setBuildMenuTableFalse();
                 return true;
             }
 
@@ -135,8 +137,21 @@ public class Hud implements Disposable {
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
             }
         });
-        Image woodImg2 = new Image(new Texture("Map//wood.png"));
-        woodImg2.setSize(24, 24);
+        Image stoneImg = new Image(new Texture("Map//stoneWall.png"));
+        stoneImg.setSize(24, 24);
+        stoneImg.addListener(new InputListener() {
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                PlayScreen.getInstance().setCurrentBlock(2);
+                setBuildMenuTableFalse();
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+            }
+        });
 
         playerLabel = new Label( "Player", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         buildMenuTable.add(playerLabel).size(50,32).padLeft(20);
@@ -154,7 +169,7 @@ public class Hud implements Disposable {
         buildMenuTable.row();
         buildMenuTable.add();
         buildMenuTable.add(woodImg).pad(6);
-        buildMenuTable.add(woodImg2).pad(6);
+        buildMenuTable.add(stoneImg).pad(6);
         buildMenuTable.setVisible(false);
         buildMenuTable.pack();
 
@@ -195,7 +210,7 @@ public class Hud implements Disposable {
 
     public void createControlsTable(){
         Image upImg = new Image(new Texture("controls//up.png"));
-        upImg.setSize(32, 32);
+        upImg.setSize(48, 48);
         upImg.setPosition(64,64);
         upImg.addListener(new InputListener() {
 
@@ -212,7 +227,7 @@ public class Hud implements Disposable {
         });
 
         Image downImg = new Image(new Texture("controls//down.png"));
-        downImg.setSize(32, 32);
+        downImg.setSize(48, 48);
         downImg.setPosition(64,0);
         downImg.addListener(new InputListener() {
 
@@ -229,7 +244,7 @@ public class Hud implements Disposable {
         });
 
         Image rightImg = new Image(new Texture("controls//right.png"));
-        rightImg.setSize(32, 32);
+        rightImg.setSize(48, 48);
         rightImg.setPosition(96,32);
         rightImg.addListener(new InputListener() {
 
@@ -246,7 +261,7 @@ public class Hud implements Disposable {
         });
 
         Image leftImg = new Image(new Texture("controls//left.png"));
-        leftImg.setSize(32, 32);
+        leftImg.setSize(48, 48);
         leftImg.setPosition(32,32);
         leftImg.addListener(new InputListener() {
 
@@ -279,14 +294,14 @@ public class Hud implements Disposable {
             }
         });
 
-        final Image buildImg = new Image(new Texture("controls//build.png"));
-        buildImg.setSize(48, 48);
-        buildImg.setPosition(576,80);
-        buildImg.addListener(new InputListener() {
+        final Image inventoryImg = new Image(new Texture("controls//chest.png"));
+        inventoryImg.setSize(48, 48);
+        inventoryImg.setPosition(30,120);
+        inventoryImg.addListener(new InputListener() {
 
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                buildPressed = true;
+                inventoryPressed = true;
                 setBuildMenuTableTrue();
                 return true;
             }
@@ -296,12 +311,50 @@ public class Hud implements Disposable {
             }
         });
 
+        final Image buildImg = new Image(new Texture("controls//redHammer.png"));
+        buildImg.setSize(48, 48);
+        buildImg.setPosition(568,120);
+        buildImg.addListener(new InputListener() {
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                buildPress = true;
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                buildPress = false;
+            }
+        });
+
+        final Image exitImg = new Image(new Texture("controls//exitDoor.png"));
+        exitImg.setSize(48, 48);
+        exitImg.setPosition(20,180);
+        exitImg.addListener(new InputListener() {
+
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                ((Game)Gdx.app.getApplicationListener()).getScreen().hide();
+                ((Game)Gdx.app.getApplicationListener()).setScreen(MainMenuScreen.getInstance());
+
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                buildPress = false;
+            }
+        });
+
+        stage.addActor(inventoryImg);
         stage.addActor(buildImg);
         stage.addActor(actionImg);
         stage.addActor(upImg);
         stage.addActor(downImg);
         stage.addActor(leftImg);
         stage.addActor(rightImg);
+        stage.addActor(exitImg);
     }
 
     public boolean isUpPressed() {
@@ -324,9 +377,14 @@ public class Hud implements Disposable {
         return actionPressed;
     }
 
-    public boolean isBuildPressed() {
-        return buildPressed;
+    public boolean isInventoryPressed() {
+        return inventoryPressed;
     }
+
+    public boolean isBuildPressed() {
+        return buildPress;
+    }
+
 
     public void setBuildMenuTableTrue(){
         buildMenuTable.setVisible(true);
@@ -342,14 +400,37 @@ public class Hud implements Disposable {
         woodLabel.setText(""+this.wood);
     }
 
+    public void substractWood(int wood){
+        this.wood = this.wood - wood;
+        woodLabel.setText(""+this.wood);
+    }
+
     public void addFood(int food){
         this.food = this.food + food;
         foodLabel.setText(""+this.food);
     }
 
+    public void substractFood(int food){
+        this.food = this.food - food;
+        foodLabel.setText(""+this.food);
+        if(this.food == 0){
+            ((Game)Gdx.app.getApplicationListener()).setScreen(GameOverScreen.getInstance());
+            Gdx.input.setInputProcessor(GameOverScreen.getInstance().stage);
+        }
+    }
+
     public void addWater(int water){
         this.water = this.water + water;
         waterLabel.setText(""+this.water);
+    }
+
+    public void substractWater(int water){
+        this.water = this.water - water;
+        waterLabel.setText(""+this.water);
+        if(this.water == 0){
+            ((Game)Gdx.app.getApplicationListener()).setScreen(GameOverScreen.getInstance());
+            Gdx.input.setInputProcessor(GameOverScreen.getInstance().stage);
+        }
     }
 
     public void addLife(int life){
@@ -358,12 +439,28 @@ public class Hud implements Disposable {
     }
 
     public void addUndergroundResources(int udergroundResources){
-        this.udergroundResources = this.udergroundResources +udergroundResources;
+        this.udergroundResources = this.udergroundResources + udergroundResources;
         undergroundResourcesLabel.setText(""+this.udergroundResources);
+    }
+    public void subtractUndergroundResources(int udergroundResources){
+        this.udergroundResources = this.udergroundResources - udergroundResources;
+        undergroundResourcesLabel.setText(""+this.udergroundResources);
+    }
+
+
+    public void decreaseLife(){
+        this.life = this.life  - 1;
+        lifeLabel.setText(""+this.life);
+        if(this.life == 0){
+            ((Game)Gdx.app.getApplicationListener()).setScreen(GameOverScreen.getInstance());
+            Gdx.input.setInputProcessor(GameOverScreen.getInstance().stage);
+        }
     }
 
     @Override
     public void dispose() {
         stage.dispose();
     }
+
+
 }
